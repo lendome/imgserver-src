@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# Agent session state
+.zircon-code/
+
+# Runtime config / local state (kept out of the repo on purpose)
+server_config.json
+**/server_config.json
+*.local.json
+routes/tproxy_local.py
+.env
+.env.*
+gpu_stats.json
+gpu_stats.json.bak
+
+# Logs
+*.log
+
+# Generated outputs
+*.png
+*.jpg
+*.wav
+*.mp4
+
+# Model weights
+*.safetensors
+*.ckpt
+*.pt
