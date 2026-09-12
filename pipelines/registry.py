@@ -195,7 +195,7 @@ def get_pipeline(name: str, checkpoint: Optional[str] = None, **kwargs) -> BaseP
                     try:
                         swap_start = time.time()
                         old_pipeline.switch_checkpoint(checkpoint)
-                        del _loaded_pipelines[old_key]
+                        _loaded_pipelines.pop(old_key, None)
                         _loaded_pipelines[key] = old_pipeline
                         old_pipeline.touch()
                         _active_checkpoints["sdxl"] = checkpoint
@@ -224,7 +224,9 @@ def get_pipeline(name: str, checkpoint: Optional[str] = None, **kwargs) -> BaseP
                 # Fast unload: component-by-component cleanup frees VRAM faster
                 # This avoids the slow full .to("cpu") move
                 old_pipeline.unload()
-                del _loaded_pipelines[old_key]
+                # pop, not del: the failed-swap fallback above may have already
+                # removed this key (double-unload bookkeeping must be idempotent)
+                _loaded_pipelines.pop(old_key, None)
                 
                 # Force VRAM cleanup between unload and load
                 gc.collect()
@@ -267,7 +269,7 @@ def get_pipeline(name: str, checkpoint: Optional[str] = None, **kwargs) -> BaseP
                 else:
                     # Different checkpoint parked, unload it
                     parked_pipeline.unload()
-                    del _parked_pipelines[parked_key]
+                    _parked_pipelines.pop(parked_key, None)
         
         # Check if pipeline is parked on CPU (for non-checkpoint cases)
         if key in _parked_pipelines:
